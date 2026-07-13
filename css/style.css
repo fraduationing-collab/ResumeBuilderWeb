@@ -1,0 +1,221 @@
+```css
+/* ================= 履歷動態變數 (預設值) ================= */
+:root {
+    --cv-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --cv-primary-color: #1F2937;
+}
+
+/* 讓履歷套用變數 */
+.resume-doc {
+    font-family: var(--cv-font-family);
+}
+.cv-name, .cv-section-title {
+    color: var(--cv-primary-color);
+}
+.cv-header {
+    border-bottom-color: var(--cv-primary-color);
+}
+.cv-section-title {
+    border-left-color: var(--cv-primary-color);
+}/* 實用主義基礎重置 */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+body { background-color: #F3F4F6; color: #1F2937; overflow: hidden; }
+
+/* ================= 首頁分流介面 ================= */
+#welcomeScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #F3F4F6; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.4s ease; overflow-y: auto; padding: 40px 20px; }
+
+.welcome-header { text-align: center; margin-bottom: 40px; }
+.welcome-title { font-size: 2rem; font-weight: 700; color: #111827; margin-bottom: 10px; }
+.welcome-subtitle { font-size: 1.1rem; color: #6B7280; }
+
+.tier-container { display: flex; gap: 24px; max-width: 1000px; width: 100%; flex-wrap: wrap; justify-content: center; }
+
+.tier-card { flex: 1; min-width: 280px; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 8px; padding: 30px; display: flex; flex-direction: column; transition: all 0.2s ease; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.tier-card:hover:not(.disabled) { border-color: #1E3A8A; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transform: translateY(-3px); }
+
+.tier-badge { display: inline-block; padding: 4px 10px; background: #E5E7EB; color: #374151; font-size: 0.8rem; font-weight: 600; border-radius: 4px; margin-bottom: 15px; align-self: flex-start; }
+.tier-card.active .tier-badge { background: #DBEAFE; color: #1E40AF; }
+
+.tier-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 12px; color: #111827; }
+.tier-desc { font-size: 0.95rem; color: #4B5563; line-height: 1.6; flex-grow: 1; margin-bottom: 24px; }
+
+.tier-btn { width: 100%; padding: 12px; background: #1F2937; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; transition: background 0.2s; font-weight: 500; }
+.tier-card:hover:not(.disabled) .tier-btn { background: #1E3A8A; }
+
+.tier-card.disabled { cursor: not-allowed; opacity: 0.85; }
+.tier-card.disabled::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(249, 250, 251, 0.5); z-index: 1; }
+.tier-card.disabled .tier-btn { background: #9CA3AF; color: #F3F4F6; }
+
+/* ================= 主要應用程式介面 ================= */
+#mainApp { display: flex; height: 100vh; width: 100vw; opacity: 0; visibility: hidden; transition: opacity 0.4s ease; }
+
+.sidebar { width: 35%; min-width: 380px; background: #FFFFFF; display: flex; flex-direction: column; border-right: 1px solid #D1D5DB; box-shadow: 2px 0 5px rgba(0,0,0,0.02); height: 100%; }
+.preview-area { width: 65%; display: flex; flex-direction: column; align-items: center; padding: 40px; overflow-y: auto; background: #E5E7EB; height: 100%; }
+
+.header { background: #1E3A8A; color: #FFFFFF; padding: 16px 24px; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; }
+.back-btn { background: none; border: 1px solid rgba(255,255,255,0.3); color: white; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; transition: 0.2s; }
+.back-btn:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+/* 對話與引導區 */
+.flow-container { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
+.system-msg { color: #374151; font-size: 0.95rem; line-height: 1.6; padding-left: 12px; border-left: 3px solid #1E3A8A; margin-bottom: 8px; }
+.user-msg { color: #6B7280; font-size: 0.95rem; text-align: right; font-style: italic; margin-bottom: 8px; }
+
+.input-group { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; padding-bottom: 20px; border-bottom: 1px dashed #E5E7EB; }
+.input-label { font-size: 0.85rem; color: #6B7280; margin-bottom: -5px; }
+input[type="text"], textarea { padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: 4px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; resize: vertical; }
+input[type="text"]:focus, textarea:focus { border-color: #1E3A8A; }
+
+.action-btn { padding: 10px 16px; background: #1F2937; color: white; border: none; border-radius: 4px; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; text-align: center; margin-top: 5px; }
+.action-btn:hover { background: #374151; }
+
+.file-upload-wrapper { border: 2px dashed #D1D5DB; padding: 20px; text-align: center; border-radius: 6px; background: #F9FAFB; cursor: pointer; transition: 0.2s; }
+.file-upload-wrapper:hover { border-color: #1E3A8A; background: #EFF6FF; }
+input[type="file"] { display: none; }
+
+/* 履歷文件編輯功能 */
+.edit-hint { display: none; width: 100%; max-width: 210mm; background: #DBEAFE; color: #1E40AF; padding: 12px; text-align: center; border-radius: 6px; font-size: 0.95rem; font-weight: 600; margin-bottom: 20px; border: 1px solid #BFDBFE; animation: fadeIn 0.5s ease; }
+.edit-hint.active { display: block; }
+
+.resume-doc { width: 100%; max-width: 210mm; min-height: 297mm; background: #FFFFFF; padding: 50px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 2px; display: none; }
+.resume-doc.active { display: block; animation: fadeIn 0.5s ease; }
+
+[contenteditable="true"] { outline: none; transition: all 0.2s ease; border-radius: 4px; padding: 2px 4px; margin: -2px -4px; }
+[contenteditable="true"]:hover { background-color: #F3F4F6; box-shadow: 0 0 0 1px #D1D5DB; cursor: text; }
+[contenteditable="true"]:focus { background-color: #FFFFFF; box-shadow: 0 0 0 2px #1E3A8A; }
+
+.empty-field { color: #9CA3AF; font-style: italic; }
+
+/* ================= 以下替換原本的 .cv-header 相關樣式 ================= */
+
+.cv-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-start; 
+    border-bottom: 2px solid #1F2937; 
+    padding-bottom: 20px; 
+    margin-bottom: 20px; 
+}
+
+.cv-header-text { 
+    flex: 1; /* 讓文字區塊自動填滿剩下的空間 */
+}
+
+.cv-name { 
+    font-size: 26px; 
+    font-weight: 700; 
+    color: #111827; 
+    letter-spacing: 2px; 
+    margin-bottom: 8px; 
+    display: inline-block;
+}
+
+.cv-contact { 
+    font-size: 13px; 
+    color: #4B5563; 
+    line-height: 1.6; 
+}
+
+/* 新增：照片預留區的樣式 (標準證件照比例) */
+.cv-photo-box { 
+    width: 35mm; 
+    height: 45mm; 
+    border: 1.5px dashed #9CA3AF; 
+    background-color: #F9FAFB; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: #9CA3AF; 
+    font-size: 13px; 
+    text-align: center; 
+    border-radius: 4px; 
+    margin-left: 20px; 
+    flex-shrink: 0; /* 防止照片框被壓縮 */
+}
+
+.cv-section { margin-bottom: 24px; }
+.cv-section-title { font-size: 16px; font-weight: 600; color: #111827; background: #F3F4F6; padding: 6px 12px; margin-bottom: 12px; border-left: 3px solid #1F2937; }
+
+.cv-item { margin-bottom: 12px; padding: 0 12px; }
+.cv-item-header { display: flex; justify-content: space-between; font-weight: 600; color: #1F2937; margin-bottom: 4px; font-size: 14px; }
+.cv-item-sub { font-size: 13px; color: #4B5563; }
+.cv-text-block { font-size: 14px; color: #374151; padding: 0 12px; line-height: 1.6; }
+.cv-attachment-box { border: 1px solid #E5E7EB; padding: 10px; margin: 0 12px 10px 12px; border-radius: 4px; display: flex; align-items: center; font-size: 13px; color: #4B5563; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* ================= 客製化懸浮工具列樣式 ================= */
+.preview-area {
+    position: relative; /* 確保懸浮選單能定位在預覽區內 */
+}
+
+.custom-panel-wrapper {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    z-index: 50;
+}
+
+.custom-toggle-btn {
+    background: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+}
+
+.custom-toggle-btn:hover {
+    background: #F3F4F6;
+    border-color: #9CA3AF;
+}
+
+.custom-panel-content {
+    margin-top: 10px;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    padding: 15px;
+    width: 200px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: none; /* 預設隱藏 */
+    flex-direction: column;
+    gap: 15px;
+    animation: fadeIn 0.2s ease;
+}
+
+.custom-panel-content.active {
+    display: flex;
+}
+
+.custom-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.custom-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4B5563;
+}
+
+.custom-group select, .custom-group input[type="color"] {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #D1D5DB;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.custom-group input[type="color"] {
+    height: 30px;
+    padding: 0;
+    border: none;
+}

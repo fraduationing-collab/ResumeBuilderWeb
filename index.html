@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專業履歷生成系統 - 模組化架構版</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div id="welcomeScreen">
+        <div class="welcome-header">
+            <h1 class="welcome-title">專業履歷生成系統</h1>
+            <p class="welcome-subtitle">請選擇最符合您求職狀態的履歷方案，我們將為您引導後續流程。</p>
+        </div>
+        <div class="tier-container">
+            <div class="tier-card active" onclick="startApp('tierA')">
+                <span class="tier-badge">推薦使用</span>
+                <h2 class="tier-title">方案 A：基礎標準版</h2>
+                <p class="tier-desc">適合需要快速產出、符合標準企業格式的求職者。即時預覽，涵蓋完整學歷、工作經驗與技能。</p>
+                <button class="tier-btn">開始生成標準履歷</button>
+            </div>
+            <div class="tier-card disabled" onclick="alert('方案 B 核心 AI 模組開發中，敬請期待！')">
+                <span class="tier-badge">開發中</span>
+                <h2 class="tier-title">方案 B：潛力發掘版</h2>
+                <p class="tier-desc">透過對話，AI 將協助您把研究專案、軟體測試等非傳統經驗轉譯為高度專業的職場技能。</p>
+                <button class="tier-btn">功能建置中</button>
+            </div>
+            <div class="tier-card disabled" onclick="alert('方案 C 精準匹配模組開發中，敬請期待！')">
+                <span class="tier-badge">開發中</span>
+                <h2 class="tier-title">方案 C：職缺精準匹配版</h2>
+                <p class="tier-desc">貼上目標職缺描述 (JD)，系統將透過關鍵字對齊與 ATS 系統優化，為您量身訂做高階履歷。</p>
+                <button class="tier-btn">功能建置中</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp">
+        <div class="sidebar">
+            <div class="header">
+                <span id="appHeaderTitle">履歷生成系統</span>
+                <button class="back-btn" onclick="returnToMenu()">返回首頁</button>
+            </div>
+            <div class="flow-container" id="flowContainer">
+                <div id="step1">
+                    <div class="system-msg">歡迎使用。首先，請提供您的<b>基本聯絡資訊</b>，以便雇主與您聯繫。</div>
+                    <div class="input-group">
+                        <span class="input-label">全名</span>
+                        <input type="text" id="inName" placeholder="例如：陳大文" oninput="liveUpdate('cvName', this.value, '您的姓名')">
+                        <span class="input-label">聯絡電話</span>
+                        <input type="text" id="inPhone" placeholder="例如：9123 4567" oninput="liveUpdate('cvPhone', this.value, '您的電話')">
+                        <span class="input-label">電子郵件</span>
+                        <input type="text" id="inEmail" placeholder="例如：test@email.com" oninput="liveUpdate('cvEmail', this.value, '您的 Email')">
+                        <span class="input-label">居住地址</span>
+                        <input type="text" id="inAddress" placeholder="例如：九龍旺角彌敦道 xxx 號" oninput="liveUpdate('cvAddress', this.value, '您的聯絡地址')">
+                        <button class="action-btn" onclick="submitStep1()">下一步：學歷背景</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="preview-area">
+            
+            <div class="custom-panel-wrapper">
+                <button class="custom-toggle-btn" onclick="toggleCustomPanel()">⚙️ 設計微調</button>
+                <div class="custom-panel-content" id="customPanelContent">
+                    <div class="custom-group">
+                        <label>📝 履歷字體</label>
+                        <select onchange="changeFont(this.value)">
+                            <option value="sans">預設 (現代無襯線)</option>
+                            <option value="serif">傳統 (明體/襯線)</option>
+                            <option value="mono">科技 (等寬字體)</option>
+                        </select>
+                    </div>
+                    <div class="custom-group">
+                        <label>🎨 主題顏色</label>
+                        <input type="color" value="#1F2937" onchange="changeThemeColor(this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="edit-hint" id="editHint">💡 提示：左側輸入時會即時預覽，您也可以隨時點擊下方文字直接修改。</div>
+            
+            <div class="resume-doc" id="resumeDoc">
+                
+                <div class="cv-header">
+                    <div class="cv-header-text">
+                        <div class="cv-name empty-field" id="cvName" contenteditable="true">您的姓名</div><br>
+                        <div class="cv-contact" contenteditable="true">
+                            📞 <span id="cvPhone" class="empty-field">您的電話</span> | ✉️ <span id="cvEmail" class="empty-field">您的 Email</span><br>
+                            🏠 <span id="cvAddress" class="empty-field">您的聯絡地址</span>
+                        </div>
+                    </div>
+                    <div class="cv-photo-box">
+                        近照<br>預留區
+                    </div>
+                </div>
+                
+                <div class="cv-section">
+                    <div class="cv-section-title" contenteditable="true">教育背景</div>
+                    <div class="cv-item">
+                        <div class="cv-item-header">
+                            <span id="cvUni" class="empty-field" contenteditable="true">大學/專科 名稱</span>
+                            <span id="cvUniYear" class="empty-field" contenteditable="true">年份</span>
+                        </div>
+                    </div>
+                    <div class="cv-item">
+                        <div class="cv-item-header">
+                            <span id="cvSec" class="empty-field" contenteditable="true">中學 名稱</span>
+                            <span id="cvSecYear" class="empty-field" contenteditable="true">年份</span>
+                        </div>
+                    </div>
+                    <div class="cv-item">
+                        <div class="cv-item-header">
+                            <span id="cvPri" class="empty-field" contenteditable="true">小學 名稱</span>
+                            <span id="cvPriYear" class="empty-field" contenteditable="true">年份</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cv-section">
+                    <div class="cv-section-title" contenteditable="true">工作與兼職經驗</div>
+                    <div class="cv-item">
+                        <div class="cv-item-header">
+                            <span id="cvExpCompany" class="empty-field" contenteditable="true">公司/機構名稱</span>
+                            <span id="cvExpYear" class="empty-field" contenteditable="true">任職期間</span>
+                        </div>
+                        <div class="cv-item-sub empty-field" id="cvExpRole" contenteditable="true">職位名稱</div>
+                        <div class="cv-text-block empty-field" style="margin-top: 5px;" id="cvExpDesc" contenteditable="true">
+                            在此簡述您的主要職責與工作內容...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="cv-section">
+                    <div class="cv-section-title" contenteditable="true">專業技能與語言</div>
+                    <div class="cv-text-block empty-field" id="cvSkills" contenteditable="true">
+                        您具備的技能將顯示於此...
+                    </div>
+                </div>
+
+                <div class="cv-section" id="cvAttachmentSection" style="display: none;">
+                    <div class="cv-section-title" contenteditable="true">證明文件與附件</div>
+                    <div class="cv-attachment-box">
+                        📎 <span id="cvFileName" contenteditable="true" style="margin-left: 8px;">已附加文件.pdf</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data/config.js"></script>
+    <script src="js/cvSync.js"></script>
+    <script src="js/chatEngine.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
