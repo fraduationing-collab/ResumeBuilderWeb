@@ -68,3 +68,43 @@ function changeThemeColor(colorHex) {
     const root = document.documentElement;
     root.style.setProperty('--cv-primary-color', colorHex);
 }
+// ================= 語言切換邏輯 =================
+
+function switchLang(mode, clickedBtn) {
+    // 1. 移除所有按鈕的 active 狀態
+    const buttons = document.querySelectorAll('.lang-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    // 2. 把點擊的按鈕加上 active 狀態
+    clickedBtn.classList.add('active');
+    
+    // 3. 更新履歷本體的 class (切換為 mode-zh, mode-en 或 mode-both)
+    const resumeDoc = document.getElementById('resumeDoc');
+    
+    // 先移除原本的 mode 類別
+    resumeDoc.classList.remove('mode-zh', 'mode-en', 'mode-both');
+    
+    // 加上新的 mode 類別
+    resumeDoc.classList.add('mode-' + mode);
+}
+// ================= 雙語輸入同步邏輯 =================
+
+function syncDualInput(targetId, zhInputId, enInputId) {
+    const zhVal = document.getElementById(zhInputId).value;
+    const enVal = document.getElementById(enInputId).value;
+    const target = document.getElementById(targetId);
+    
+    // 我們在 HTML 裡定義好的雙語結構
+    // 透過 JavaScript 動態填入兩個 span
+    target.innerHTML = `
+        <span class="txt-zh">${zhVal || '您的姓名'}</span>
+        <span class="txt-en">${enVal || 'Your Name'}</span>
+    `;
+    
+    // 如果兩個都沒寫，加上 empty-field 樣式
+    if (!zhVal && !enVal) {
+        target.classList.add('empty-field');
+    } else {
+        target.classList.remove('empty-field');
+    }
+}

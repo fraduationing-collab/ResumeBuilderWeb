@@ -111,3 +111,5 @@ function submitFinal(btn) {
     flowContainer.appendChild(finalDiv);
     scrollToBottom();
 }
+
+document.getElementById('resumeDoc').classList.add('active');

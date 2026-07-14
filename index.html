@@ -3,156 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專業履歷生成系統 - 模組化架構版</title>
-    
+    <title>RB - Resume Builder</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ================= 新增：摺疊選單 (Checklist) 樣式 ================= */
+        .accordion-item {
+            margin-bottom: 10px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #FFFFFF;
+        }
+        
+        .accordion-header {
+            width: 100%;
+            padding: 15px;
+            background: #F9FAFB;
+            border: none;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #1F2937;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .accordion-header:hover {
+            background: #E5E7EB;
+        }
+
+        .accordion-content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+
+        /* 當加入 active 類別時展開 */
+        .accordion-content.active {
+            padding: 15px;
+            max-height: 2000px; /* 足夠大的數值以容納動態新增的內容 */
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .status-icon {
+            font-size: 0.9em;
+            color: #9CA3AF;
+        }
+        
+        /* 匯出工具列與其他按鈕樣式 */
+        .export-panel { background: #E5E7EB; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        .export-btn { padding: 8px 16px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .export-btn.pdf { background: #DC2626; color: white; }
+        .export-btn.word { background: #2563EB; color: white; }
+        .export-btn.video { background: #7C3AED; color: white; }
+        .export-btn:hover { opacity: 0.8; }
+        
+        .upload-box { border: 2px dashed #9CA3AF; padding: 15px; text-align: center; border-radius: 6px; background: #F9FAFB; cursor: pointer; font-size: 0.9em; color: #4B5563; margin-top: 5px; }
+        .upload-box:hover { border-color: #1F2937; background: #F3F4F6; }
+        .ai-magic-btn { background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .add-btn { background: #1F2937; color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; margin-top: 10px; font-weight: bold;}
+        /* ================= AI 小聊天框專屬樣式 ================= */
+.ai-chat-box {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease, margin 0.3s ease;
+    background: #EFF6FF;
+    border-radius: 6px;
+    border: 1px solid transparent;
+}
+
+.ai-chat-box.active {
+    max-height: 300px;
+    padding: 12px;
+    margin-top: 8px;
+    border-color: #BFDBFE;
+}
+
+.ai-chat-box textarea {
+    width: 100%;
+    border: 1px solid #93C5FD;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    resize: none;
+}
+
+.ai-submit-btn {
+    background: #2563EB;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: bold;
+    float: right;
+}
+
+.ai-submit-btn:hover {
+    background: #1D4ED8;
+}
+
+/* 清除浮動 */
+.ai-chat-box::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+    </style>
 </head>
 <body>
 
-    <div id="welcomeScreen">
-        <div class="welcome-header">
-            <h1 class="welcome-title">專業履歷生成系統</h1>
-            <p class="welcome-subtitle">請選擇最符合您求職狀態的履歷方案，我們將為您引導後續流程。</p>
-        </div>
-        <div class="tier-container">
-            <div class="tier-card active" onclick="startApp('tierA')">
-                <span class="tier-badge">推薦使用</span>
-                <h2 class="tier-title">方案 A：基礎標準版</h2>
-                <p class="tier-desc">適合需要快速產出、符合標準企業格式的求職者。即時預覽，涵蓋完整學歷、工作經驗與技能。</p>
-                <button class="tier-btn">開始生成標準履歷</button>
-            </div>
-            <div class="tier-card disabled" onclick="alert('方案 B 核心 AI 模組開發中，敬請期待！')">
-                <span class="tier-badge">開發中</span>
-                <h2 class="tier-title">方案 B：潛力發掘版</h2>
-                <p class="tier-desc">透過對話，AI 將協助您把研究專案、軟體測試等非傳統經驗轉譯為高度專業的職場技能。</p>
-                <button class="tier-btn">功能建置中</button>
-            </div>
-            <div class="tier-card disabled" onclick="alert('方案 C 精準匹配模組開發中，敬請期待！')">
-                <span class="tier-badge">開發中</span>
-                <h2 class="tier-title">方案 C：職缺精準匹配版</h2>
-                <p class="tier-desc">貼上目標職缺描述 (JD)，系統將透過關鍵字對齊與 ATS 系統優化，為您量身訂做高階履歷。</p>
-                <button class="tier-btn">功能建置中</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="mainApp">
-        <div class="sidebar">
-            <div class="header">
-                <span id="appHeaderTitle">履歷生成系統</span>
-                <button class="back-btn" onclick="returnToMenu()">返回首頁</button>
-            </div>
-            <div class="flow-container" id="flowContainer">
-                <div id="step1">
-                    <div class="system-msg">歡迎使用。首先，請提供您的<b>基本聯絡資訊</b>，以便雇主與您聯繫。</div>
-                    <div class="input-group">
-                        <span class="input-label">全名</span>
-                        <input type="text" id="inName" placeholder="例如：陳大文" oninput="liveUpdate('cvName', this.value, '您的姓名')">
-                        <span class="input-label">聯絡電話</span>
-                        <input type="text" id="inPhone" placeholder="例如：9123 4567" oninput="liveUpdate('cvPhone', this.value, '您的電話')">
-                        <span class="input-label">電子郵件</span>
-                        <input type="text" id="inEmail" placeholder="例如：test@email.com" oninput="liveUpdate('cvEmail', this.value, '您的 Email')">
-                        <span class="input-label">居住地址</span>
-                        <input type="text" id="inAddress" placeholder="例如：九龍旺角彌敦道 xxx 號" oninput="liveUpdate('cvAddress', this.value, '您的聯絡地址')">
-                        <button class="action-btn" onclick="submitStep1()">下一步：學歷背景</button>
-                    </div>
+<div id="mainApp">
+    <!-- 左側系統引導區 (Checklist 模式) -->
+    <div class="sidebar">
+        <div class="header" style="margin-bottom: 20px;">RB 履歷生成系統 (香港版)</div>
+        
+        <!-- 模塊 1：基本資料 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panelBasic', 'iconBasic')">
+                <span>1. 基本聯絡資訊</span>
+                <span class="status-icon" id="iconBasic">➕ 點擊展開</span>
+            </button>
+            <div class="accordion-content" id="panelBasic">
+                <div class="input-group">
+                    <span class="input-label">全名 (Full Name)</span>
+                    <input type="text" id="inNameZh" placeholder="中文全名" oninput="syncDualInput()">
+                    <input type="text" id="inNameEn" placeholder="English Full Name" oninput="syncDualInput()">
+                    
+                    <span class="input-label">聯絡電話 (Phone)</span>
+                    <input type="text" id="inPhone" placeholder="例如：9123 4567" oninput="liveUpdate('cvPhone', this.value, '電話 Phone')">
+                    
+                    <span class="input-label">電子郵件 (Email)</span>
+                    <input type="text" id="inEmail" placeholder="例如：test@email.com" oninput="liveUpdate('cvEmail', this.value, 'Email')">
+                    
+                    <span class="input-label">居住地址 (Address)</span>
+                    <input type="text" id="inAddress" placeholder="例如：九龍旺角..." oninput="liveUpdate('cvAddress', this.value, '地址 Address')">
                 </div>
             </div>
         </div>
 
-        <div class="preview-area">
-            
-            <div class="custom-panel-wrapper">
-                <button class="custom-toggle-btn" onclick="toggleCustomPanel()">⚙️ 設計微調</button>
-                <div class="custom-panel-content" id="customPanelContent">
-                    <div class="custom-group">
-                        <label>📝 履歷字體</label>
-                        <select onchange="changeFont(this.value)">
-                            <option value="sans">預設 (現代無襯線)</option>
-                            <option value="serif">傳統 (明體/襯線)</option>
-                            <option value="mono">科技 (等寬字體)</option>
-                        </select>
-                    </div>
-                    <div class="custom-group">
-                        <label>🎨 主題顏色</label>
-                        <input type="color" value="#1F2937" onchange="changeThemeColor(this.value)">
-                    </div>
+        <!-- 模塊 2：學歷背景 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panelEdu', 'iconEdu')">
+                <span>2. 學歷背景</span>
+                <span class="status-icon" id="iconEdu">➕ 點擊展開</span>
+            </button>
+            <div class="accordion-content" id="panelEdu">
+                <div class="input-group">
+                    <div id="eduExpInputs"></div>
+                    <button class="add-btn" onclick="addEduExp()">+ 新增一份學歷</button>
                 </div>
             </div>
+        </div>
 
-            <div class="edit-hint" id="editHint">💡 提示：左側輸入時會即時預覽，您也可以隨時點擊下方文字直接修改。</div>
-            
-            <div class="resume-doc" id="resumeDoc">
-                
-                <div class="cv-header">
-                    <div class="cv-header-text">
-                        <div class="cv-name empty-field" id="cvName" contenteditable="true">您的姓名</div><br>
-                        <div class="cv-contact" contenteditable="true">
-                            📞 <span id="cvPhone" class="empty-field">您的電話</span> | ✉️ <span id="cvEmail" class="empty-field">您的 Email</span><br>
-                            🏠 <span id="cvAddress" class="empty-field">您的聯絡地址</span>
-                        </div>
-                    </div>
-                    <div class="cv-photo-box">
-                        近照<br>預留區
-                    </div>
+        <!-- 模塊 3：工作經驗 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panelWork', 'iconWork')">
+                <span>3. 工作與兼職經驗</span>
+                <span class="status-icon" id="iconWork">➕ 點擊展開</span>
+            </button>
+            <div class="accordion-content" id="panelWork">
+                <div class="input-group">
+                    <div id="workExpInputs"></div>
+                    <button class="add-btn" onclick="addWorkExp()">+ 新增一份工作經歷</button>
                 </div>
-                
-                <div class="cv-section">
-                    <div class="cv-section-title" contenteditable="true">教育背景</div>
-                    <div class="cv-item">
-                        <div class="cv-item-header">
-                            <span id="cvUni" class="empty-field" contenteditable="true">大學/專科 名稱</span>
-                            <span id="cvUniYear" class="empty-field" contenteditable="true">年份</span>
-                        </div>
-                    </div>
-                    <div class="cv-item">
-                        <div class="cv-item-header">
-                            <span id="cvSec" class="empty-field" contenteditable="true">中學 名稱</span>
-                            <span id="cvSecYear" class="empty-field" contenteditable="true">年份</span>
-                        </div>
-                    </div>
-                    <div class="cv-item">
-                        <div class="cv-item-header">
-                            <span id="cvPri" class="empty-field" contenteditable="true">小學 名稱</span>
-                            <span id="cvPriYear" class="empty-field" contenteditable="true">年份</span>
-                        </div>
-                    </div>
-                </div>
+            </div>
+        </div>
 
-                <div class="cv-section">
-                    <div class="cv-section-title" contenteditable="true">工作與兼職經驗</div>
-                    <div class="cv-item">
-                        <div class="cv-item-header">
-                            <span id="cvExpCompany" class="empty-field" contenteditable="true">公司/機構名稱</span>
-                            <span id="cvExpYear" class="empty-field" contenteditable="true">任職期間</span>
-                        </div>
-                        <div class="cv-item-sub empty-field" id="cvExpRole" contenteditable="true">職位名稱</div>
-                        <div class="cv-text-block empty-field" style="margin-top: 5px;" id="cvExpDesc" contenteditable="true">
-                            在此簡述您的主要職責與工作內容...
-                        </div>
+        <!-- 模塊 4：專業證書 (含上傳) -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panelCert', 'iconCert')">
+                <span>4. 專業證書與技能</span>
+                <span class="status-icon" id="iconCert">➕ 點擊展開</span>
+            </button>
+            <div class="accordion-content" id="panelCert">
+                <div class="input-group">
+                    <div class="upload-box" onclick="document.getElementById('certUpload').click()">
+                        📁 點擊上傳證書圖片 (支援 JPG, PNG)
                     </div>
-                </div>
-                
-                <div class="cv-section">
-                    <div class="cv-section-title" contenteditable="true">專業技能與語言</div>
-                    <div class="cv-text-block empty-field" id="cvSkills" contenteditable="true">
-                        您具備的技能將顯示於此...
-                    </div>
-                </div>
-
-                <div class="cv-section" id="cvAttachmentSection" style="display: none;">
-                    <div class="cv-section-title" contenteditable="true">證明文件與附件</div>
-                    <div class="cv-attachment-box">
-                        📎 <span id="cvFileName" contenteditable="true" style="margin-left: 8px;">已附加文件.pdf</span>
-                    </div>
+                    <input type="file" id="certUpload" style="display: none;" accept="image/*">
+                    <button class="ai-magic-btn">✨ AI 自動識別填寫</button>
+                    <div id="certInputs"></div>
+                    <button class="add-btn" onclick="addCert()">+ 手動新增證書</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="data/config.js"></script>
-    <script src="js/cvSync.js"></script>
-    <script src="js/chatEngine.js"></script>
-    <script src="js/app.js"></script>
+    <!-- 右側文件預覽區 -->
+    <div class="preview-area">
+        
+        <div class="export-panel">
+            <span style="font-weight: bold; margin-right: auto; color: #1F2937;">導出履歷：</span>
+            <button class="export-btn pdf">匯出 PDF</button>
+            <button class="export-btn word">匯出 Word</button>
+            <button class="export-btn video">匯出為影片</button>
+        </div>
+
+        <div class="lang-switch-wrapper">
+            <button class="lang-btn active" onclick="switchLang('both', this)">中英對照</button>
+            <button class="lang-btn" onclick="switchLang('zh', this)">繁體中文</button>
+            <button class="lang-btn" onclick="switchLang('en', this)">English</button>
+        </div>
+
+        <div class="resume-doc mode-both" id="resumeDoc">
+            <!-- 修復：完整包含 Email、地址與照片預留區的 Header -->
+            <div class="cv-header">
+                <div class="cv-header-text">
+                    <div class="cv-name" id="cvName">
+                        <span class="txt-zh">您的姓名</span>
+                        <span class="txt-en">Your Name</span>
+                    </div>
+                    <div class="cv-contact" style="margin-top: 8px;">
+                        📞 <span id="cvPhone">電話 Phone</span> | ✉️ <span id="cvEmail">Email</span><br>
+                        🏠 <span id="cvAddress">地址 Address</span>
+                    </div>
+                </div>
+                <div class="cv-photo-box">
+                    <span class="txt-zh">近照<br>預留區</span>
+                    <span class="txt-en">Photo</span>
+                </div>
+            </div>
+            
+            <div class="cv-section">
+                <div class="cv-section-title" id="cvEduTitle" style="display: none;">
+                    <span class="txt-zh">學歷背景</span>
+                    <span class="txt-en">Education</span>
+                </div>
+                <div id="cvEduExpList"></div>
+            </div>
+
+            <div class="cv-section">
+                <div class="cv-section-title" id="cvWorkTitle" style="display: none;">
+                    <span class="txt-zh">工作經驗</span>
+                    <span class="txt-en">Work Experience</span>
+                </div>
+                <div id="cvWorkExpList"></div>
+            </div>
+            
+            <div class="cv-section">
+                <div class="cv-section-title" id="cvCertTitle" style="display: none;">
+                    <span class="txt-zh">專業證書與技能</span>
+                    <span class="txt-en">Certifications & Skills</span>
+                </div>
+                <div id="cvCertList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 摺疊選單 (Accordion) 邏輯 ---
+    function toggleAccordion(panelId, iconId) {
+        const panel = document.getElementById(panelId);
+        const icon = document.getElementById(iconId);
+        
+        if (panel.classList.contains('active')) {
+            panel.classList.remove('active');
+            icon.innerText = "➕ 點擊展開";
+        } else {
+            // 可以選擇關閉其他已展開的面版 (可選)
+            /*
+            document.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.status-icon').forEach(el => el.innerText = "➕ 點擊展開");
+            */
+            
+            panel.classList.add('active');
+            icon.innerText = "➖ 收起";
+        }
+    }
+
+    // --- 基礎資料同步 ---
+    function syncDualInput() {
+        const zhVal = document.getElementById('inNameZh').value;
+        const enVal = document.getElementById('inNameEn').value;
+        document.getElementById('cvName').innerHTML = `<span class="txt-zh">${zhVal || '您的姓名'}</span><span class="txt-en">${enVal || 'Your Name'}</span>`;
+    }
+    function liveUpdate(elementId, value, defaultText) { 
+        document.getElementById(elementId).innerText = value || defaultText; 
+    }
+    
+    function switchLang(mode, clickedBtn) {
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        clickedBtn.classList.add('active');
+        document.getElementById('resumeDoc').className = 'resume-doc mode-' + mode;
+    }
+
+    // --- 動態新增學歷 ---
+    let eduCount = 0;
+    function addEduExp() {
+        eduCount++; const id = eduCount;
+        const container = document.getElementById('eduExpInputs');
+        container.innerHTML += `<div class="input-group" style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;"><input type="text" id="schoolZh_${id}" placeholder="學校 (中文)" oninput="syncEdu(${id})"><input type="text" id="schoolEn_${id}" placeholder="School (English)" oninput="syncEdu(${id})"></div>`;
+        document.getElementById('cvEduExpList').innerHTML += `<div class="cv-item" style="margin-bottom:10px;"><div class="cv-item-header"><span class="txt-zh" id="cvSchoolZh_${id}">學校名稱</span><span class="txt-en" id="cvSchoolEn_${id}">School</span></div></div>`;
+        document.getElementById('cvEduTitle').style.display = 'block';
+    }
+    function syncEdu(id) {
+        document.getElementById(`cvSchoolZh_${id}`).innerText = document.getElementById(`schoolZh_${id}`).value || '學校名稱';
+        document.getElementById(`cvSchoolEn_${id}`).innerText = document.getElementById(`schoolEn_${id}`).value || 'School';
+    }
+
+    // --- 動態新增工作 ---
+    // --- 動態新增工作 (加入 AI 小聊天框) ---
+let workCount = 0;
+function addWorkExp() {
+    workCount++; 
+    const id = workCount;
+    const container = document.getElementById('workExpInputs');
+    
+    // 將輸入框、AI 按鈕與隱藏的聊天框包裝在一起
+    const newWorkHtml = `
+        <div class="input-group" style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">經歷 ${id}</div>
+            <input type="text" id="companyZh_${id}" placeholder="公司名稱 (中文)" oninput="syncWork(${id})">
+            <input type="text" id="companyEn_${id}" placeholder="Company Name (English)" oninput="syncWork(${id})">
+            <input type="text" id="roleZh_${id}" placeholder="職位名稱 (中文)" oninput="syncWork(${id})">
+            <input type="text" id="roleEn_${id}" placeholder="Job Title (English)" oninput="syncWork(${id})">
+            
+            <button class="ai-magic-btn" onclick="toggleAiChat('aiChat_${id}')">✨ AI 幫我寫工作內容</button>
+            
+            <div id="aiChat_${id}" class="ai-chat-box">
+                <div style="font-size: 0.85rem; color: #1E3A8A; margin-bottom: 6px; font-weight: bold;">
+                    🤖 請用大白話描述你的日常工作：
+                </div>
+                <textarea id="aiPrompt_${id}" rows="3" placeholder="例如：每天幫忙結帳、排班、偶爾要發 IG 限動..."></textarea>
+                <button class="ai-submit-btn" onclick="simulateAiResponse(${id})">送出生成</button>
+            </div>
+        </div>
+    `;
+    
+    // 寫入左側表單
+    container.insertAdjacentHTML('beforeend', newWorkHtml);
+    
+    // 寫入右側預覽
+    const previewHtml = `
+        <div class="cv-item" style="margin-bottom:10px;">
+            <div class="cv-item-header">
+                <span class="txt-zh" id="cvCompZh_${id}">公司名稱</span>
+                <span class="txt-en" id="cvCompEn_${id}">Company</span>
+            </div>
+            <div class="cv-item-sub">
+                <span class="txt-zh" id="cvRoleZh_${id}">職位名稱</span>
+                <span class="txt-en" id="cvRoleEn_${id}">Job Title</span>
+            </div>
+            <div class="cv-text-block" style="margin-top: 4px;">
+                <span class="txt-zh" id="cvDescZh_${id}"></span>
+                <span class="txt-en" id="cvDescEn_${id}"></span>
+            </div>
+        </div>
+    `;
+    document.getElementById('cvWorkExpList').insertAdjacentHTML('beforeend', previewHtml);
+    document.getElementById('cvWorkTitle').style.display = 'block';
+}
+
+function syncWork(id) {
+    document.getElementById(`cvCompZh_${id}`).innerText = document.getElementById(`companyZh_${id}`).value || '公司名稱';
+    document.getElementById(`cvCompEn_${id}`).innerText = document.getElementById(`companyEn_${id}`).value || 'Company';
+    document.getElementById(`cvRoleZh_${id}`).innerText = document.getElementById(`roleZh_${id}`).value || '職位名稱';
+    document.getElementById(`cvRoleEn_${id}`).innerText = document.getElementById(`roleEn_${id}`).value || 'Job Title';
+}
+
+// --- 控制 AI 聊天框展開/收合 ---
+function toggleAiChat(chatBoxId) {
+    const chatBox = document.getElementById(chatBoxId);
+    chatBox.classList.toggle('active');
+}
+
+// --- 模擬 AI 生成內容的測試函數 ---
+function simulateAiResponse(id) {
+    const userPrompt = document.getElementById(`aiPrompt_${id}`).value;
+    if(!userPrompt) {
+        alert("請先輸入一點白話文內容喔！");
+        return;
+    }
+    
+    // 這裡未來會替換成真實的 API 呼叫，現在先用假資料模擬
+    const mockAiZh = "負責店鋪日常營運與收銀管理，並協助經營官方社群媒體，提升品牌曝光度。";
+    const mockAiEn = "Managed daily store operations and cashier duties; assisted in managing official social media to enhance brand visibility.";
+    
+    // 將結果直接填入右側預覽區
+    document.getElementById(`cvDescZh_${id}`).innerText = "• " + mockAiZh;
+    document.getElementById(`cvDescEn_${id}`).innerText = "• " + mockAiEn;
+    
+    // 收起聊天框
+    toggleAiChat(`aiChat_${id}`);
+    alert("AI 已經幫你把專業內容寫入右側履歷中了！");
+}
+    // --- 動態新增證書 ---
+    let certCount = 0;
+    function addCert() {
+        certCount++; const id = certCount;
+        document.getElementById('certInputs').innerHTML += `<div class="input-group" style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;"><input type="text" id="certZh_${id}" placeholder="證書名稱 (中文)" oninput="syncCert(${id})"><input type="text" id="certEn_${id}" placeholder="Certificate Name (English)" oninput="syncCert(${id})"></div>`;
+        document.getElementById('cvCertList').innerHTML += `<div class="cv-item"><span class="txt-zh" id="cvCertNameZh_${id}">證書名稱</span><span class="txt-en" id="cvCertNameEn_${id}">Certificate Name</span></div>`;
+        document.getElementById('cvCertTitle').style.display = 'block';
+    }
+    function syncCert(id) {
+        document.getElementById(`cvCertNameZh_${id}`).innerText = document.getElementById(`certZh_${id}`).value || '證書名稱';
+        document.getElementById(`cvCertNameEn_${id}`).innerText = document.getElementById(`certEn_${id}`).value || 'Certificate Name';
+    }
+</script>
 </body>
 </html>
