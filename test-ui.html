@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <title>右側功能區 UI 視覺測試沙盒</title>
+    <style>
+        body { margin: 0; display: flex; height: 100vh; font-family: sans-serif; background: #e5e7eb; overflow: hidden; flex-direction: column; }
+        
+        /* 頂部切換控制台 (僅供測試用) */
+        .test-controls { background: #1F2937; color: white; padding: 10px; display: flex; gap: 10px; justify-content: center; z-index: 1000;}
+        .test-controls button { padding: 8px 16px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+        
+        /* 主要佈局與拖曳把手 */
+        .workspace { display: flex; flex: 1; position: relative; overflow: hidden; }
+        .pane-left { width: 40%; background: #f9fafb; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
+        .resizer { width: 8px; background: #cbd5e1; cursor: col-resize; display: flex; justify-content: center; align-items: center; transition: background 0.2s; }
+        .resizer:hover { background: #94a3b8; }
+        .pane-right { flex: 1; background: white; padding: 20px; display: flex; justify-content: center; align-items: center; }
+        .dummy-resume { width: 60%; height: 80%; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #999; }
+
+        /* ================= 樣式 A：快捷氣泡 (Speed Dial) ================= */
+        .style-a { position: absolute; bottom: 30px; right: 30px; display: none; flex-direction: column-reverse; align-items: center; gap: 10px; }
+        .fab-main { width: 56px; height: 56px; border-radius: 50%; background: #2563EB; color: white; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .fab-menu { display: none; flex-direction: column; gap: 10px; }
+        .style-a:hover .fab-menu { display: flex; } /* 滑鼠移入展開 */
+        .fab-item { width: 48px; height: 48px; border-radius: 50%; background: white; border: 1px solid #ccc; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        /* ================= 樣式 B：專業側邊抽屜 (Side Drawer) ================= */
+        .style-b { position: absolute; top: 0; right: 0; height: 100%; display: none; }
+        .drawer-bar { width: 50px; height: 100%; background: #1F2937; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px; z-index: 10; position: relative;}
+        .drawer-icon { color: white; font-size: 20px; cursor: pointer; }
+        .drawer-panel { position: absolute; top: 0; right: -250px; width: 250px; height: 100%; background: white; box-shadow: -2px 0 5px rgba(0,0,0,0.1); transition: right 0.3s; padding: 20px; box-sizing: border-box; }
+        .style-b.active .drawer-panel { right: 50px; } /* 點擊展開 */
+
+        /* ================= 樣式 C：邊緣標籤與彈出卡 (Edge Tab) ================= */
+        .style-c { position: absolute; top: 50%; right: 0; transform: translateY(-50%); display: none; }
+        .edge-tab { background: #DC2626; color: white; padding: 15px 5px; cursor: pointer; border-radius: 8px 0 0 8px; box-shadow: -2px 0 4px rgba(0,0,0,0.1); }
+        .popover-card { position: absolute; right: 40px; top: -50px; width: 200px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: none; border: 1px solid #eee;}
+        .style-c.active .popover-card { display: block; } /* 點擊展開 */
+        
+    </style>
+</head>
+<body>
+
+    <!-- 頂部測試按鈕 -->
+    <div class="test-controls">
+        <button onclick="showStyle('A')">預覽樣式 A：懸浮快捷氣泡</button>
+        <button onclick="showStyle('B')">預覽樣式 B：專業側邊抽屜</button>
+        <button onclick="showStyle('C')">預覽樣式 C：邊緣彈出卡片</button>
+    </div>
+
+    <div class="workspace">
+        <!-- 左側輸入區 -->
+        <div class="pane-left"><h3>左側：輸入區</h3><p>未來將可以自由拖曳中間的灰色線條來縮放寬度。</p></div>
+        
+        <!-- 分隔拖曳條 (Resizer) -->
+        <div class="resizer">||</div>
+        
+        <!-- 右側預覽區 -->
+        <div class="pane-right">
+            <div class="dummy-resume">這裡是不受干擾的履歷預覽區</div>
+        </div>
+
+        <!-- 樣式 A 結構 -->
+        <div id="styleA" class="style-a">
+            <button class="fab-main">⚙️</button>
+            <div class="fab-menu">
+                <button class="fab-item">📥</button>
+                <button class="fab-item">🎨</button>
+                <button class="fab-item">A+</button>
+            </div>
+        </div>
+
+        <!-- 樣式 B 結構 -->
+        <div id="styleB" class="style-b">
+            <div class="drawer-panel">
+                <h3>完整設定選單</h3>
+                <p>這裡是滑出的詳細設定面板，適合放置複雜的顏色與字體設定。</p>
+                <hr>
+                <p>📥 匯出 PDF</p>
+            </div>
+            <div class="drawer-bar">
+                <div class="drawer-icon" onclick="document.getElementById('styleB').classList.toggle('active')">⚙️</div>
+                <div class="drawer-icon">🎨</div>
+                <div class="drawer-icon">🌐</div>
+            </div>
+        </div>
+
+        <!-- 樣式 C 結構 -->
+        <div id="styleC" class="style-c">
+            <div class="popover-card">
+                <h4 style="margin-top:0;">樣式與匯出</h4>
+                <button style="width:100%; margin-bottom:5px;">📥 匯出 PDF</button>
+                <button style="width:100%;">🎨 調整顏色</button>
+            </div>
+            <div class="edge-tab" onclick="document.getElementById('styleC').classList.toggle('active')">◀</div>
+        </div>
+    </div>
+
+    <script>
+        // 切換顯示三種樣式的簡單邏輯
+        function showStyle(styleName) {
+            document.getElementById('styleA').style.display = 'none';
+            document.getElementById('styleB').style.display = 'none';
+            document.getElementById('styleC').style.display = 'none';
+            
+            if(styleName === 'A') document.getElementById('styleA').style.display = 'flex';
+            if(styleName === 'B') document.getElementById('styleB').style.display = 'block';
+            if(styleName === 'C') document.getElementById('styleC').style.display = 'block';
+        }
+        
+        // 預設顯示 A
+        showStyle('A');
+    </script>
+</body>
+</html>

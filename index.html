@@ -6,125 +6,123 @@
     <title>RB - Resume Builder</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* ================= 新增：摺疊選單 (Checklist) 樣式 ================= */
-        .accordion-item {
-            margin-bottom: 10px;
-            border: 1px solid #D1D5DB;
-            border-radius: 6px;
-            overflow: hidden;
-            background: #FFFFFF;
-        }
+        /* ================= 基礎佈局與拖曳分隔線 ================= */
+        body { margin: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+        #mainApp { display: flex; flex-direction: row; height: 100vh; width: 100vw; background: #e5e7eb; }
         
-        .accordion-header {
-            width: 100%;
-            padding: 15px;
-            background: #F9FAFB;
-            border: none;
-            text-align: left;
-            font-size: 1rem;
-            font-weight: bold;
-            color: #1F2937;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.2s;
-        }
-
-        .accordion-header:hover {
-            background: #E5E7EB;
-        }
-
-        .accordion-content {
-            padding: 0 15px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out, padding 0.3s ease;
-        }
-
-        /* 當加入 active 類別時展開 */
-        .accordion-content.active {
-            padding: 15px;
-            max-height: 2000px; /* 足夠大的數值以容納動態新增的內容 */
-            border-top: 1px solid #E5E7EB;
-        }
-
-        .status-icon {
-            font-size: 0.9em;
-            color: #9CA3AF;
-        }
+        /* 左側輸入區 */
+        .sidebar { width: 35%; min-width: 300px; max-width: 60%; background: #FFFFFF; display: flex; flex-direction: column; overflow-y: auto; padding: 20px; box-sizing: border-box; }
         
-        /* 匯出工具列與其他按鈕樣式 */
-        .export-panel { background: #E5E7EB; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
-        .export-btn { padding: 8px 16px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        /* 拖曳把手 */
+        .resizer { width: 8px; background: #cbd5e1; cursor: col-resize; display: flex; justify-content: center; align-items: center; color: #64748b; font-size: 10px; user-select: none; transition: background 0.2s; flex-shrink: 0; z-index: 10;}
+        .resizer:hover, .resizer:active { background: #94a3b8; color: white; }
+
+        /* 中間預覽區 */
+        .preview-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 40px; overflow-y: auto; background: #E5E7EB; position: relative; }
+
+        /* ================= 摺疊選單 (Checklist) ================= */
+        .accordion-item { margin-bottom: 10px; border: 1px solid #D1D5DB; border-radius: 6px; overflow: hidden; background: #FFFFFF; flex-shrink: 0;}
+        .accordion-header { width: 100%; padding: 15px; background: #F9FAFB; border: none; text-align: left; font-size: 1rem; font-weight: bold; color: #1F2937; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .accordion-header:hover { background: #E5E7EB; }
+        .accordion-content { padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease; }
+        .accordion-content.active { padding: 15px; max-height: 2000px; border-top: 1px solid #E5E7EB; }
+        .status-icon { font-size: 0.9em; color: #9CA3AF; }
+        
+        .input-group { padding: 15px 0; display: flex; flex-direction: column; gap: 8px; }
+        .input-label { font-size: 0.85rem; font-weight: bold; color: #4B5563; margin-top: 5px; }
+        input[type="text"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+
+        .upload-box { border: 2px dashed #9CA3AF; padding: 12px; text-align: center; border-radius: 6px; background: #F9FAFB; cursor: pointer; font-size: 0.9em; color: #4B5563; transition: 0.2s; }
+        .upload-box:hover { border-color: #1F2937; background: #F3F4F6; }
+        .add-btn { background: #1F2937; color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; margin-top: 10px; font-weight: bold;}
+        
+        .ai-magic-btn { background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .ai-chat-box { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease, margin 0.3s ease; background: #EFF6FF; border-radius: 6px; border: 1px solid transparent; }
+        .ai-chat-box.active { max-height: 300px; padding: 12px; margin-top: 8px; border-color: #BFDBFE; }
+        .ai-chat-box textarea { width: 100%; border: 1px solid #93C5FD; border-radius: 4px; padding: 8px; font-size: 0.9rem; margin-bottom: 8px; resize: none; box-sizing: border-box;}
+        .ai-submit-btn { background: #2563EB; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: bold; float: right; }
+        
+        /* ================= 樣式 B：右側專業抽屜 (Drawer) ================= */
+        .right-drawer-wrapper { display: flex; position: relative; z-index: 50; flex-shrink: 0; background: #FFFFFF; box-shadow: -2px 0 5px rgba(0,0,0,0.05);}
+        .drawer-bar { width: 56px; background: #1F2937; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 25px; z-index: 60; }
+        .drawer-icon { color: #9CA3AF; font-size: 22px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 5px;}
+        .drawer-icon:hover, .drawer-icon.active { color: #FFFFFF; transform: scale(1.1);}
+        .drawer-icon span { font-size: 10px; font-weight: bold;}
+        .drawer-panel { position: absolute; top: 0; right: 56px; width: 0; overflow: hidden; height: 100%; background: #F9FAFB; transition: width 0.3s ease, padding 0.3s ease; white-space: nowrap; border-left: 1px solid #E5E7EB; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px;}
+        .right-drawer-wrapper.open .drawer-panel { width: 280px; padding: 25px; white-space: normal; overflow-y: auto; }
+        
+        .drawer-section-title { font-size: 1rem; font-weight: bold; color: #111827; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #E5E7EB; }
+        .setting-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;}
+        .setting-group label { font-size: 0.85rem; font-weight: bold; color: #4B5563; }
+        .setting-group select { padding: 8px; border: 1px solid #D1D5DB; border-radius: 4px; font-size: 0.9rem; outline: none; width: 100%;}
+        .color-picker-wrapper { display: flex; align-items: center; gap: 10px; }
+        .setting-group input[type="color"] { width: 40px; height: 40px; padding: 0; border: none; border-radius: 4px; cursor: pointer; }
+        .font-btn-group { display: flex; gap: 10px; }
+        .font-btn { background: #FFFFFF; border: 1px solid #D1D5DB; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; flex: 1; transition: 0.2s; text-align: center;}
+        .font-btn:hover { background: #E5E7EB; }
+
+        .export-btn { padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%; text-align: center; margin-bottom: 10px;}
         .export-btn.pdf { background: #DC2626; color: white; }
         .export-btn.word { background: #2563EB; color: white; }
-        .export-btn.video { background: #7C3AED; color: white; }
-        .export-btn:hover { opacity: 0.8; }
+        .export-btn:hover { opacity: 0.9; }
+
+        /* ================= 履歷本體與主題模板 ================= */
+        .resume-doc { 
+            width: 100%; max-width: 210mm; min-height: 297mm; background: #FFFFFF; padding: 50px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 2px; box-sizing: border-box;
+            --theme-color: #1F2937; --base-font-size: 14px; font-size: var(--base-font-size); transition: all 0.3s ease; 
+        }
+
+        /* 恢復履歷頭部排版：左右對齊 */
+        .cv-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--theme-color); padding-bottom: 20px; margin-bottom: 20px; }
+        .cv-header-text { flex: 1; }
+        .cv-name { font-size: 26px; font-weight: bold; color: var(--theme-color); letter-spacing: 2px; margin-bottom: 8px; display: inline-block; }
+        .cv-contact { font-size: 13px; color: #4B5563; line-height: 1.6; }
         
-        .upload-box { border: 2px dashed #9CA3AF; padding: 15px; text-align: center; border-radius: 6px; background: #F9FAFB; cursor: pointer; font-size: 0.9em; color: #4B5563; margin-top: 5px; }
-        .upload-box:hover { border-color: #1F2937; background: #F3F4F6; }
-        .ai-magic-btn { background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .add-btn { background: #1F2937; color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; margin-top: 10px; font-weight: bold;}
-        /* ================= AI 小聊天框專屬樣式 ================= */
-.ai-chat-box {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out, padding 0.3s ease, margin 0.3s ease;
-    background: #EFF6FF;
-    border-radius: 6px;
-    border: 1px solid transparent;
-}
+        /* 恢復照片預留區樣式 */
+        .cv-photo-box { 
+            width: 35mm; height: 45mm; border: 1.5px dashed #9CA3AF; background-color: #F9FAFB; 
+            display: flex; align-items: center; justify-content: center; color: #9CA3AF; font-size: 13px; 
+            text-align: center; border-radius: 4px; margin-left: 20px; flex-shrink: 0; 
+            cursor: pointer; overflow: hidden; position: relative; transition: 0.2s;
+        }
+        .cv-photo-box:hover { border-color: var(--theme-color); background-color: #F3F4F6; }
+        .cv-photo-box img { width: 100%; height: 100%; object-fit: cover; }
 
-.ai-chat-box.active {
-    max-height: 300px;
-    padding: 12px;
-    margin-top: 8px;
-    border-color: #BFDBFE;
-}
+        .cv-section { margin-bottom: 24px; }
+        .cv-section-title { font-size: 16px; font-weight: 600; color: var(--theme-color); background: #F3F4F6; padding: 6px 12px; margin-bottom: 12px; border-left: 3px solid var(--theme-color); }
+        .cv-item { margin-bottom: 12px; padding: 0 12px; }
+        .cv-item-header { display: flex; justify-content: space-between; font-weight: 600; color: #1F2937; margin-bottom: 4px; font-size: 14px; }
+        .cv-item-sub { font-size: 13px; color: #4B5563; }
+        .cv-text-block { font-size: 14px; color: #374151; padding: 0 12px; line-height: 1.6; }
 
-.ai-chat-box textarea {
-    width: 100%;
-    border: 1px solid #93C5FD;
-    border-radius: 4px;
-    padding: 8px;
-    font-size: 0.9rem;
-    margin-bottom: 8px;
-    resize: none;
-}
+        /* 中英雙語切換邏輯 */
+        .txt-zh, .txt-en { display: inline-block; transition: all 0.2s ease; }
+        .mode-both .txt-en { color: #4B5563; font-weight: 400; margin-left: 2px; }
+        .mode-both .txt-zh::after { content: " / "; color: #D1D5DB; margin: 0 6px; }
+        .mode-zh .txt-en { display: none !important; }
+        .mode-zh .txt-zh::after { display: none !important; }
+        .mode-en .txt-zh { display: none !important; }
 
-.ai-submit-btn {
-    background: #2563EB;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    font-weight: bold;
-    float: right;
-}
-
-.ai-submit-btn:hover {
-    background: #1D4ED8;
-}
-
-/* 清除浮動 */
-.ai-chat-box::after {
-    content: "";
-    display: table;
-    clear: both;
-}
+        /* 主題差異覆蓋 */
+        .theme-modern .cv-section-title { background: transparent; border-bottom: 2px solid var(--theme-color); border-left: none; padding: 6px 0; margin-bottom: 15px; }
+        .theme-modern .cv-header { border-bottom: 1px solid #E5E7EB; }
+        .theme-creative .cv-name { text-align: center; display: block; font-size: 30px;}
+        .theme-creative .cv-contact { text-align: center; width: 100%; margin-top: 10px;}
+        .theme-creative .cv-header-text { flex: none; width: 100%; }
+        .theme-creative .cv-header { flex-direction: column; align-items: center; border-bottom: 3px double var(--theme-color); }
+        .theme-creative .cv-photo-box { display: none; } /* 創新版型預設隱藏照片 */
+        .theme-creative .cv-section-title { background: var(--theme-color); color: white; border-radius: 4px; text-align: center; border: none; }
     </style>
 </head>
 <body>
 
 <div id="mainApp">
-    <!-- 左側系統引導區 (Checklist 模式) -->
-    <div class="sidebar">
-        <div class="header" style="margin-bottom: 20px;">RB 履歷生成系統 (香港版)</div>
+    <input type="file" id="globalPhotoUpload" accept="image/*" style="display: none;" onchange="handlePhotoUpload(this)">
+
+    <div class="sidebar" id="sidebarPane">
+        <div class="header" style="margin-bottom: 20px; font-weight: bold; font-size: 1.1rem; color: #1F2937; flex-shrink: 0;">RB 履歷生成系統</div>
         
-        <!-- 模塊 1：基本資料 -->
         <div class="accordion-item">
             <button class="accordion-header" onclick="toggleAccordion('panelBasic', 'iconBasic')">
                 <span>1. 基本聯絡資訊</span>
@@ -132,23 +130,24 @@
             </button>
             <div class="accordion-content" id="panelBasic">
                 <div class="input-group">
-                    <span class="input-label">全名 (Full Name)</span>
+                    <span class="input-label">個人近照 (Photo)</span>
+                    <div class="upload-box" onclick="document.getElementById('globalPhotoUpload').click()">
+                        📷 點擊上傳大頭照 (支援 JPG, PNG)
+                    </div>
+
+                    <span class="input-label">全名</span>
                     <input type="text" id="inNameZh" placeholder="中文全名" oninput="syncDualInput()">
                     <input type="text" id="inNameEn" placeholder="English Full Name" oninput="syncDualInput()">
-                    
-                    <span class="input-label">聯絡電話 (Phone)</span>
+                    <span class="input-label">聯絡電話</span>
                     <input type="text" id="inPhone" placeholder="例如：9123 4567" oninput="liveUpdate('cvPhone', this.value, '電話 Phone')">
-                    
-                    <span class="input-label">電子郵件 (Email)</span>
+                    <span class="input-label">電子郵件</span>
                     <input type="text" id="inEmail" placeholder="例如：test@email.com" oninput="liveUpdate('cvEmail', this.value, 'Email')">
-                    
-                    <span class="input-label">居住地址 (Address)</span>
+                    <span class="input-label">居住地址</span>
                     <input type="text" id="inAddress" placeholder="例如：九龍旺角..." oninput="liveUpdate('cvAddress', this.value, '地址 Address')">
                 </div>
             </div>
         </div>
 
-        <!-- 模塊 2：學歷背景 -->
         <div class="accordion-item">
             <button class="accordion-header" onclick="toggleAccordion('panelEdu', 'iconEdu')">
                 <span>2. 學歷背景</span>
@@ -162,7 +161,6 @@
             </div>
         </div>
 
-        <!-- 模塊 3：工作經驗 -->
         <div class="accordion-item">
             <button class="accordion-header" onclick="toggleAccordion('panelWork', 'iconWork')">
                 <span>3. 工作與兼職經驗</span>
@@ -171,49 +169,16 @@
             <div class="accordion-content" id="panelWork">
                 <div class="input-group">
                     <div id="workExpInputs"></div>
-                    <button class="add-btn" onclick="addWorkExp()">+ 新增一份工作經歷</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 模塊 4：專業證書 (含上傳) -->
-        <div class="accordion-item">
-            <button class="accordion-header" onclick="toggleAccordion('panelCert', 'iconCert')">
-                <span>4. 專業證書與技能</span>
-                <span class="status-icon" id="iconCert">➕ 點擊展開</span>
-            </button>
-            <div class="accordion-content" id="panelCert">
-                <div class="input-group">
-                    <div class="upload-box" onclick="document.getElementById('certUpload').click()">
-                        📁 點擊上傳證書圖片 (支援 JPG, PNG)
-                    </div>
-                    <input type="file" id="certUpload" style="display: none;" accept="image/*">
-                    <button class="ai-magic-btn">✨ AI 自動識別填寫</button>
-                    <div id="certInputs"></div>
-                    <button class="add-btn" onclick="addCert()">+ 手動新增證書</button>
+                    <button class="add-btn" onclick="addWorkExp()">+ 新增工作經歷</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 右側文件預覽區 -->
+    <div class="resizer" id="dragResizer">||</div>
+
     <div class="preview-area">
-        
-        <div class="export-panel">
-            <span style="font-weight: bold; margin-right: auto; color: #1F2937;">導出履歷：</span>
-            <button class="export-btn pdf">匯出 PDF</button>
-            <button class="export-btn word">匯出 Word</button>
-            <button class="export-btn video">匯出為影片</button>
-        </div>
-
-        <div class="lang-switch-wrapper">
-            <button class="lang-btn active" onclick="switchLang('both', this)">中英對照</button>
-            <button class="lang-btn" onclick="switchLang('zh', this)">繁體中文</button>
-            <button class="lang-btn" onclick="switchLang('en', this)">English</button>
-        </div>
-
-        <div class="resume-doc mode-both" id="resumeDoc">
-            <!-- 修復：完整包含 Email、地址與照片預留區的 Header -->
+        <div class="resume-doc mode-both theme-classic" id="resumeDoc">
             <div class="cv-header">
                 <div class="cv-header-text">
                     <div class="cv-name" id="cvName">
@@ -225,9 +190,11 @@
                         🏠 <span id="cvAddress">地址 Address</span>
                     </div>
                 </div>
-                <div class="cv-photo-box">
-                    <span class="txt-zh">近照<br>預留區</span>
-                    <span class="txt-en">Photo</span>
+                <div class="cv-photo-box" id="cvPhotoBox" onclick="document.getElementById('globalPhotoUpload').click()" title="點擊上傳大頭照">
+                    <div>
+                        <span class="txt-zh">近照<br>預留區</span>
+                        <span class="txt-en">Photo</span>
+                    </div>
                 </div>
             </div>
             
@@ -246,34 +213,120 @@
                 </div>
                 <div id="cvWorkExpList"></div>
             </div>
-            
-            <div class="cv-section">
-                <div class="cv-section-title" id="cvCertTitle" style="display: none;">
-                    <span class="txt-zh">專業證書與技能</span>
-                    <span class="txt-en">Certifications & Skills</span>
+        </div>
+    </div>
+
+    <div class="right-drawer-wrapper" id="rightDrawer">
+        <div class="drawer-panel">
+            <div class="drawer-section-title">🌐 語言與內容</div>
+            <div class="setting-group">
+                <div class="lang-switch-wrapper" style="display: flex; gap: 5px; flex-direction: column;">
+                    <button class="font-btn" onclick="switchLang('both', this)" style="background: #1F2937; color: white;">中英對照</button>
+                    <button class="font-btn" onclick="switchLang('zh', this)">僅繁體中文</button>
+                    <button class="font-btn" onclick="switchLang('en', this)">僅 English</button>
                 </div>
-                <div id="cvCertList"></div>
+            </div>
+
+            <div class="drawer-section-title" style="margin-top: 10px;">🎨 排版與視覺</div>
+            <div class="setting-group">
+                <label>風格模板：</label>
+                <select id="themeSelect" onchange="changeTheme(this.value)">
+                    <option value="theme-classic">經典專業 (標準配置)</option>
+                    <option value="theme-modern">現代簡約 (俐落線條)</option>
+                    <option value="theme-creative">創新專業 (置中大標)</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>字體大小：</label>
+                <div class="font-btn-group">
+                    <button class="font-btn" onclick="changeFontSize(-1)">A- 縮小</button>
+                    <button class="font-btn" onclick="changeFontSize(1)">A+ 放大</button>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label>重點主色調：</label>
+                <div class="color-picker-wrapper">
+                    <input type="color" id="colorPicker" value="#1F2937" onchange="changeColor(this.value)">
+                    <span style="font-size: 0.8rem; color: #6B7280;">點擊左側變更顏色</span>
+                </div>
+            </div>
+
+            <div class="drawer-section-title" style="margin-top: auto;">📥 檔案匯出</div>
+            <button class="export-btn pdf" onclick="alert('準備打包匯出！')">📥 匯出為 PDF</button>
+            <button class="export-btn word" onclick="alert('準備打包匯出！')">📄 匯出為 Word</button>
+        </div>
+
+        <div class="drawer-bar">
+            <div class="drawer-icon" onclick="toggleDrawer()" id="drawerToggleBtn">
+                ⚙️<span>設定</span>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- 摺疊選單 (Accordion) 邏輯 ---
+    // --- 左右拖曳縮放邏輯 (Split Pane) ---
+    const resizer = document.getElementById('dragResizer');
+    const sidebarPane = document.getElementById('sidebarPane');
+    let isDragging = false;
+
+    resizer.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        document.body.style.cursor = 'col-resize';
+        resizer.style.background = '#94a3b8'; 
+    });
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        let newWidth = (e.clientX / window.innerWidth) * 100;
+        if(newWidth < 20) newWidth = 20; 
+        if(newWidth > 60) newWidth = 60; 
+        sidebarPane.style.width = newWidth + '%';
+    });
+    document.addEventListener('mouseup', function(e) {
+        if(isDragging) {
+            isDragging = false;
+            document.body.style.cursor = 'default';
+            resizer.style.background = '#cbd5e1'; 
+        }
+    });
+
+    // --- 照片上傳預覽邏輯 ---
+    function handlePhotoUpload(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const box = document.getElementById('cvPhotoBox');
+                // 將預留區替換成上傳的圖片，確保填滿並隱藏邊框
+                box.innerHTML = `<img src="${e.target.result}" alt="CV Photo">`;
+                box.style.border = 'none';
+                box.style.backgroundColor = 'transparent';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // --- 右側抽屜展開邏輯 ---
+    function toggleDrawer() {
+        const drawer = document.getElementById('rightDrawer');
+        const btn = document.getElementById('drawerToggleBtn');
+        drawer.classList.toggle('open');
+        if(drawer.classList.contains('open')) {
+            btn.classList.add('active');
+            btn.innerHTML = '✖️<span>關閉</span>';
+        } else {
+            btn.classList.remove('active');
+            btn.innerHTML = '⚙️<span>設定</span>';
+        }
+    }
+
+    // --- 摺疊選單邏輯 ---
     function toggleAccordion(panelId, iconId) {
         const panel = document.getElementById(panelId);
         const icon = document.getElementById(iconId);
-        
         if (panel.classList.contains('active')) {
             panel.classList.remove('active');
             icon.innerText = "➕ 點擊展開";
         } else {
-            // 可以選擇關閉其他已展開的面版 (可選)
-            /*
-            document.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.status-icon').forEach(el => el.innerText = "➕ 點擊展開");
-            */
-            
             panel.classList.add('active');
             icon.innerText = "➖ 收起";
         }
@@ -285,14 +338,33 @@
         const enVal = document.getElementById('inNameEn').value;
         document.getElementById('cvName').innerHTML = `<span class="txt-zh">${zhVal || '您的姓名'}</span><span class="txt-en">${enVal || 'Your Name'}</span>`;
     }
-    function liveUpdate(elementId, value, defaultText) { 
-        document.getElementById(elementId).innerText = value || defaultText; 
-    }
+    function liveUpdate(elementId, value, defaultText) { document.getElementById(elementId).innerText = value || defaultText; }
     
+    // --- 語言與樣式控制 ---
     function switchLang(mode, clickedBtn) {
-        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-        clickedBtn.classList.add('active');
-        document.getElementById('resumeDoc').className = 'resume-doc mode-' + mode;
+        clickedBtn.parentElement.querySelectorAll('.font-btn').forEach(btn => {
+            btn.style.background = '#FFFFFF';
+            btn.style.color = 'initial';
+        });
+        clickedBtn.style.background = '#1F2937';
+        clickedBtn.style.color = 'white';
+        const doc = document.getElementById('resumeDoc');
+        const currentTheme = Array.from(doc.classList).find(c => c.startsWith('theme-'));
+        doc.className = `resume-doc mode-${mode} ${currentTheme}`;
+    }
+
+    function changeTheme(themeClass) {
+        const doc = document.getElementById('resumeDoc');
+        const currentMode = Array.from(doc.classList).find(c => c.startsWith('mode-'));
+        doc.className = `resume-doc ${currentMode} ${themeClass}`;
+    }
+    function changeColor(colorHex) { document.getElementById('resumeDoc').style.setProperty('--theme-color', colorHex); }
+    let currentFontSize = 14;
+    function changeFontSize(step) {
+        currentFontSize += step;
+        if (currentFontSize < 12) currentFontSize = 12;
+        if (currentFontSize > 18) currentFontSize = 18;
+        document.getElementById('resumeDoc').style.setProperty('--base-font-size', currentFontSize + 'px');
     }
 
     // --- 動態新增學歷 ---
@@ -300,7 +372,7 @@
     function addEduExp() {
         eduCount++; const id = eduCount;
         const container = document.getElementById('eduExpInputs');
-        container.innerHTML += `<div class="input-group" style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;"><input type="text" id="schoolZh_${id}" placeholder="學校 (中文)" oninput="syncEdu(${id})"><input type="text" id="schoolEn_${id}" placeholder="School (English)" oninput="syncEdu(${id})"></div>`;
+        container.innerHTML += `<div style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px; display:flex; flex-direction:column; gap:5px;"><input type="text" id="schoolZh_${id}" placeholder="學校 (中文)" oninput="syncEdu(${id})"><input type="text" id="schoolEn_${id}" placeholder="School (English)" oninput="syncEdu(${id})"></div>`;
         document.getElementById('cvEduExpList').innerHTML += `<div class="cv-item" style="margin-bottom:10px;"><div class="cv-item-header"><span class="txt-zh" id="cvSchoolZh_${id}">學校名稱</span><span class="txt-en" id="cvSchoolEn_${id}">School</span></div></div>`;
         document.getElementById('cvEduTitle').style.display = 'block';
     }
@@ -310,102 +382,44 @@
     }
 
     // --- 動態新增工作 ---
-    // --- 動態新增工作 (加入 AI 小聊天框) ---
-let workCount = 0;
-function addWorkExp() {
-    workCount++; 
-    const id = workCount;
-    const container = document.getElementById('workExpInputs');
-    
-    // 將輸入框、AI 按鈕與隱藏的聊天框包裝在一起
-    const newWorkHtml = `
-        <div class="input-group" style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;">
-            <div style="font-weight: bold; margin-bottom: 5px;">經歷 ${id}</div>
-            <input type="text" id="companyZh_${id}" placeholder="公司名稱 (中文)" oninput="syncWork(${id})">
-            <input type="text" id="companyEn_${id}" placeholder="Company Name (English)" oninput="syncWork(${id})">
-            <input type="text" id="roleZh_${id}" placeholder="職位名稱 (中文)" oninput="syncWork(${id})">
-            <input type="text" id="roleEn_${id}" placeholder="Job Title (English)" oninput="syncWork(${id})">
-            
-            <button class="ai-magic-btn" onclick="toggleAiChat('aiChat_${id}')">✨ AI 幫我寫工作內容</button>
-            
-            <div id="aiChat_${id}" class="ai-chat-box">
-                <div style="font-size: 0.85rem; color: #1E3A8A; margin-bottom: 6px; font-weight: bold;">
-                    🤖 請用大白話描述你的日常工作：
+    let workCount = 0;
+    function addWorkExp() {
+        workCount++; const id = workCount;
+        document.getElementById('workExpInputs').insertAdjacentHTML('beforeend', `
+            <div style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px; display:flex; flex-direction:column; gap:5px;">
+                <div style="font-weight: bold; margin-bottom: 5px; color: #4B5563;">經歷 ${id}</div>
+                <input type="text" id="companyZh_${id}" placeholder="公司名稱 (中文)" oninput="syncWork(${id})">
+                <input type="text" id="companyEn_${id}" placeholder="Company Name (English)" oninput="syncWork(${id})">
+                <input type="text" id="roleZh_${id}" placeholder="職位名稱 (中文)" oninput="syncWork(${id})">
+                <input type="text" id="roleEn_${id}" placeholder="Job Title (English)" oninput="syncWork(${id})">
+                <button class="ai-magic-btn" onclick="toggleAiChat('aiChat_${id}')">✨ AI 幫我寫工作內容</button>
+                <div id="aiChat_${id}" class="ai-chat-box">
+                    <textarea id="aiPrompt_${id}" rows="3" placeholder="例如：每天幫忙結帳..."></textarea>
+                    <button class="ai-submit-btn" onclick="simulateAiResponse(${id})">送出生成</button>
                 </div>
-                <textarea id="aiPrompt_${id}" rows="3" placeholder="例如：每天幫忙結帳、排班、偶爾要發 IG 限動..."></textarea>
-                <button class="ai-submit-btn" onclick="simulateAiResponse(${id})">送出生成</button>
             </div>
-        </div>
-    `;
-    
-    // 寫入左側表單
-    container.insertAdjacentHTML('beforeend', newWorkHtml);
-    
-    // 寫入右側預覽
-    const previewHtml = `
-        <div class="cv-item" style="margin-bottom:10px;">
-            <div class="cv-item-header">
-                <span class="txt-zh" id="cvCompZh_${id}">公司名稱</span>
-                <span class="txt-en" id="cvCompEn_${id}">Company</span>
+        `);
+        document.getElementById('cvWorkExpList').insertAdjacentHTML('beforeend', `
+            <div class="cv-item" style="margin-bottom:10px;">
+                <div class="cv-item-header"><span class="txt-zh" id="cvCompZh_${id}">公司</span><span class="txt-en" id="cvCompEn_${id}">Company</span></div>
+                <div class="cv-item-sub"><span class="txt-zh" id="cvRoleZh_${id}">職位</span><span class="txt-en" id="cvRoleEn_${id}">Job Title</span></div>
+                <div class="cv-text-block" style="margin-top: 4px;"><span class="txt-zh" id="cvDescZh_${id}"></span><span class="txt-en" id="cvDescEn_${id}"></span></div>
             </div>
-            <div class="cv-item-sub">
-                <span class="txt-zh" id="cvRoleZh_${id}">職位名稱</span>
-                <span class="txt-en" id="cvRoleEn_${id}">Job Title</span>
-            </div>
-            <div class="cv-text-block" style="margin-top: 4px;">
-                <span class="txt-zh" id="cvDescZh_${id}"></span>
-                <span class="txt-en" id="cvDescEn_${id}"></span>
-            </div>
-        </div>
-    `;
-    document.getElementById('cvWorkExpList').insertAdjacentHTML('beforeend', previewHtml);
-    document.getElementById('cvWorkTitle').style.display = 'block';
-}
-
-function syncWork(id) {
-    document.getElementById(`cvCompZh_${id}`).innerText = document.getElementById(`companyZh_${id}`).value || '公司名稱';
-    document.getElementById(`cvCompEn_${id}`).innerText = document.getElementById(`companyEn_${id}`).value || 'Company';
-    document.getElementById(`cvRoleZh_${id}`).innerText = document.getElementById(`roleZh_${id}`).value || '職位名稱';
-    document.getElementById(`cvRoleEn_${id}`).innerText = document.getElementById(`roleEn_${id}`).value || 'Job Title';
-}
-
-// --- 控制 AI 聊天框展開/收合 ---
-function toggleAiChat(chatBoxId) {
-    const chatBox = document.getElementById(chatBoxId);
-    chatBox.classList.toggle('active');
-}
-
-// --- 模擬 AI 生成內容的測試函數 ---
-function simulateAiResponse(id) {
-    const userPrompt = document.getElementById(`aiPrompt_${id}`).value;
-    if(!userPrompt) {
-        alert("請先輸入一點白話文內容喔！");
-        return;
+        `);
+        document.getElementById('cvWorkTitle').style.display = 'block';
     }
-    
-    // 這裡未來會替換成真實的 API 呼叫，現在先用假資料模擬
-    const mockAiZh = "負責店鋪日常營運與收銀管理，並協助經營官方社群媒體，提升品牌曝光度。";
-    const mockAiEn = "Managed daily store operations and cashier duties; assisted in managing official social media to enhance brand visibility.";
-    
-    // 將結果直接填入右側預覽區
-    document.getElementById(`cvDescZh_${id}`).innerText = "• " + mockAiZh;
-    document.getElementById(`cvDescEn_${id}`).innerText = "• " + mockAiEn;
-    
-    // 收起聊天框
-    toggleAiChat(`aiChat_${id}`);
-    alert("AI 已經幫你把專業內容寫入右側履歷中了！");
-}
-    // --- 動態新增證書 ---
-    let certCount = 0;
-    function addCert() {
-        certCount++; const id = certCount;
-        document.getElementById('certInputs').innerHTML += `<div class="input-group" style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;"><input type="text" id="certZh_${id}" placeholder="證書名稱 (中文)" oninput="syncCert(${id})"><input type="text" id="certEn_${id}" placeholder="Certificate Name (English)" oninput="syncCert(${id})"></div>`;
-        document.getElementById('cvCertList').innerHTML += `<div class="cv-item"><span class="txt-zh" id="cvCertNameZh_${id}">證書名稱</span><span class="txt-en" id="cvCertNameEn_${id}">Certificate Name</span></div>`;
-        document.getElementById('cvCertTitle').style.display = 'block';
+    function syncWork(id) {
+        document.getElementById(`cvCompZh_${id}`).innerText = document.getElementById(`companyZh_${id}`).value || '公司名稱';
+        document.getElementById(`cvCompEn_${id}`).innerText = document.getElementById(`companyEn_${id}`).value || 'Company';
+        document.getElementById(`cvRoleZh_${id}`).innerText = document.getElementById(`roleZh_${id}`).value || '職位名稱';
+        document.getElementById(`cvRoleEn_${id}`).innerText = document.getElementById(`roleEn_${id}`).value || 'Job Title';
     }
-    function syncCert(id) {
-        document.getElementById(`cvCertNameZh_${id}`).innerText = document.getElementById(`certZh_${id}`).value || '證書名稱';
-        document.getElementById(`cvCertNameEn_${id}`).innerText = document.getElementById(`certEn_${id}`).value || 'Certificate Name';
+    function toggleAiChat(id) { document.getElementById(id).classList.toggle('active'); }
+    function simulateAiResponse(id) {
+        if(!document.getElementById(`aiPrompt_${id}`).value) return alert("請先輸入內容！");
+        document.getElementById(`cvDescZh_${id}`).innerText = "• 負責日常營運管理。";
+        document.getElementById(`cvDescEn_${id}`).innerText = "• Managed daily operations.";
+        toggleAiChat(`aiChat_${id}`);
     }
 </script>
 </body>
